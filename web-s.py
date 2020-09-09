@@ -1,10 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from extract import extract
 
 
 # from BeautifulSoup import BeautifulSoup
@@ -41,13 +42,33 @@ searchButton = driver.find_element_by_css_selector(".vh79eN")
 searchButton.click();
 print('Start to search laptop products.')
 
-try:
-    search_result_summary_element = WebDriverWait(driver, FIND_ELEMENT_TIMEOUT).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, '._2yAnYN')))
-except TimeoutException:
-    driver.quit()
-else:
-    print(search_result_summary_element.get_attribute('innerText'))
+allLaptops = []
+page_no = 1
+next_page_link_xpath = "//nav[@class='_1ypTlJ']/a[@class='_3fVaIS' and span='Next']"
+while True:
+    current_page_link_xpath = "//nav[@class='_1ypTlJ']/a[@class='_2Xp0TH fyt9Eu' and text()='" + str(page_no) + "']"
+    try:
+        current_page_link = WebDriverWait(driver, FIND_ELEMENT_TIMEOUT).until(
+            EC.presence_of_element_located((By.XPATH, current_page_link_xpath)))
+    except TimeoutException:
+        break
+    else:
+        print('Start to handle the data of page ' + str(page_no))
+
+    laptops = extract(driver.page_source)
+    for laptop in laptops:
+        allLaptops.append(laptop)
+
+    try:
+        next_page_link = driver.find_element_by_xpath(next_page_link_xpath)
+    except NoSuchElementException:
+        print('All pages have been handled')
+        break
+    else:
+        page_no += 1
+        next_page_link.click()
+
+print(len(allLaptops))
 
 driver.quit()
 
