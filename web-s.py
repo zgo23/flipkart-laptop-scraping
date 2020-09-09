@@ -15,7 +15,7 @@ FIND_ELEMENT_TIMEOUT = 30
 websiteUrl = 'http://www.flipkart.com'
 chrome_options = Options()
 chrome_options.add_argument("--headless")
-driver = webdriver.Chrome(chrome_options=chrome_options)
+driver = webdriver.Chrome(options=chrome_options)
 driver.get(websiteUrl)
 
 try:
